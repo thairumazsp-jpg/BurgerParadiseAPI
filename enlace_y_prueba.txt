@@ -1,0 +1,43 @@
+SENA - Análisis y Desarrollo de Software (ADSO)
+Evidencia: GA7-220501096-AA5-EV01. Evidencia de desempeño Diseño y desarrollo de servicios web - caso.  
+
+Aprendiz: Thairuma Salcedo
+Enlace del Repositorio en GitHub: https://github.com/thairumazsp-jpg/BurgerParadiseAPI.git
+Entorno local: Apache Tomcat 
+Base de Datos: MariaDB/MySQL (Puerto local alterno: 3307)
+Casos de Prueba Ejecutados Exitosamente:
+
+CASO DE PRUEBA 1: Validación de Credenciales Vacías 
+* Endpoint URL: http://localhost:8080/BurgerParadiseAPI/api/auth/login?username=&password=
+* Acción: Se realiza una petición HTTP GET simulada omitiendo los valores obligatorios.
+* Comportamiento del Back-End: El Servlet intercepta la solicitud mediante condicionales lógicos de control de nulos y vacíos (.isEmpty() / .trim()).
+* Respuesta JSON esperada (HTTP 400 Bad Request):
+  {"status": "error", "message": "Faltan credenciales obligatorias (username/password)"}
+* Estado del caso: SATISFACTORIO / APROBADO
+
+CASO DE PRUEBA 2: Error de Autenticación / Login Fallido
+
+* Endpoint URL: http://localhost:8080/BurgerParadiseAPI/api/auth/login?username=usuarioInvalido&password=999
+* Acción: Se envían parámetros de usuario y contraseña que no existen registrados en la tabla 'usuarios' de la base de datos 'burger_paradise'.
+* Comportamiento del Back-End: Ejecuta un PreparedStatement mediante la conexión al puerto 3307. Al no encontrar coincidencias en el ResultSet (rs.next() es falso), salta al bloque de denegación segura.
+* Respuesta JSON esperada (HTTP 401 Unauthorized):
+  {"status": "error", "message": "Error en la autenticacion. Usuario o contrasena incorrectos."}
+* Estado del caso: SATISFACTORIO / APROBADO
+
+
+CASO DE PRUEBA 3: Autenticación Satisfactoria / Login Exitoso 
+* Endpoint URL: http://localhost:8080/BurgerParadiseAPI/api/auth/login?username=admin&password=12345
+* Acción: Se realiza una consulta con credenciales previamente dadas de alta en la Shell de comandos de MariaDB de XAMPP.
+* Comportamiento del Back-End: El motor de base de datos valida la igualdad de cadenas de texto. El ResultSet retorna verdadero y concede acceso seguro.
+* Respuesta JSON esperada (HTTP 200 OK):
+  {"status": "success", "message": "Autenticacion satisfactoria. Bienvenido a Burger Paradise API."}
+* Estado del caso: SATISFACTORIO / APROBADO
+
+
+CASO DE PRUEBA 4: Servicio de Registro de Usuarios (Criterio 1)
+* Endpoint URL: http://localhost:8080/BurgerParadiseAPI/api/auth/register (Método POST)
+* Acción: Envío de nuevos parámetros de usuario para inserción en la base de datos.
+* Comportamiento del Back-End: Ejecuta una sentencia SQL de inserción (INSERT INTO). En caso de duplicidad, el bloque try-catch captura una excepción del tipo 'SQLIntegrityConstraintViolationException' impidiendo el colapso del servidor.
+* Respuesta JSON esperada en inserción limpia (HTTP 201 Created):
+  {"status": "success", "message": "Usuario registrado correctamente en el servicio web."}
+* Estado del caso: SATISFACTORIO / APROBADO
